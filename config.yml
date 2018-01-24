@@ -1,0 +1,12 @@
+
+pinconfig:
+    pinpull: up
+    bouncetime: 80
+
+buttons:
+    up: 5
+    down: 6
+    left: 13
+    right: 19
+    fire: 26
+
