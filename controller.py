@@ -120,13 +120,13 @@ def main():
     startLogging(stdout)
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--real", action="store_true") #Use test by default
+    parser.add_argument("-t", "--test", action="store_true")
     args = parser.parse_args()
     
-    if args.real:
-        turret = Turret
-    else:
+    if args.test:
         turret = TestTurret
+    else:
+        turret = Turret
     
     factory = TurretControlFactory(turret)
     factory.protocol = TurretControlProtocol

@@ -41,7 +41,7 @@ class Stepper(object):
             GPIO.output(io_pin, self.seq[self.step_counter%self.steps][pin])   
     
     def stop(self):
-        # TODO: decel
+        # TODO: deccelerate
         if self.loop:
             self.loop.stop()
             self.loop = None

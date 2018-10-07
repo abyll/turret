@@ -25,3 +25,4 @@ class DimmerRGB():
         self.pwm.set_pwm(self.ch_r, 0, int(r*4095))
         self.pwm.set_pwm(self.ch_g, 0, int(g*4095))
         self.pwm.set_pwm(self.ch_b, 0, int(b*4095))
+
