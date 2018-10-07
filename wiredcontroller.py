@@ -8,7 +8,7 @@ from twisted.python.log import startLogging, err
 from twisted.internet import reactor, task
 
 import yaml
-config = yaml.load(open("config.yml").read())
+config = yaml.load(open("wired_config.yml").read())
 pinconfig = config["pinconfig"]
 buttons = config["buttons"]
 
