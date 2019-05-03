@@ -8,13 +8,22 @@ if __name__ == "__main__":
 
     RX=3
     TX=4
+    CHANNELS = {
+        "up": 4,
+        "down": 2,
+        "left": 8,
+        "right": 0,
+        "fire": 6
+        }
 
     # define optional callback for received codes.
 
     def rx_callback(code, bits, gap, t0, t1):
-        output = "{0:b}".format(code)
-        print("code={} bits={})".
-            format(code, output))
+        ch = {}
+        for name, channel in CHANNELS:
+            ch[name] = code & 1 << channel != 0
+        print("code={} bits={}\nchannels={})".
+            format(code, output, ch))
 
     pi = pigpio.pi() # Connect to local Pi.
 
