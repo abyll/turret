@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from servo import *
-from stepper import Stepper
+from stepper import Stepper, ThreadStepper
 from led import DimmerRGB
 import Adafruit_PCA9685
 import RPi.GPIO as IO
@@ -58,7 +58,6 @@ class Turret(object):
         self.stepper.step_forever(-direction)
     
     def stop_pan(self):
-        print("pan:{}".format(self.pan_angle))
         self.stepper.stop()
     
     def _tilt_loop(self):
@@ -172,9 +171,14 @@ class TestTurret(Turret):
 
 class ThreadTurret(Turret):
     def __init__(self, tilt_min=-90, tilt_max = 90):
-            super(Turret, self).__init__(tilt_min, tilt_max)
+            super(ThreadTurret, self).__init__(tilt_min, tilt_max)
             self._tilt_thread = None
             self.tilt_loop = False
+    
+    def _init_stepper(self):
+        #init steppers
+        self.stepper = ThreadStepper()
+        self.pan_angle = 0 # angle
 
     def _tilt_worker(self):
         self.tilt_loop = True

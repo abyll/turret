@@ -3,7 +3,6 @@
 # This will move channel 0 from min to max position repeatedly.
 # Author: Tony DiCola
 # License: Public Domain
-import time
 
 
 def clamp(a, low, high):
@@ -65,6 +64,7 @@ if __name__ == "__main__":
     chA = 0
     chB = 1
 
+    import time
     import Adafruit_PCA9685
     pwm = Adafruit_PCA9685.PCA9685()
     # define range of PITCH

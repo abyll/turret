@@ -5,7 +5,8 @@
 from sys import stdin, stdout
 import argparse
 from turret import Turret, TestTurret, ThreadTurret
-
+import time
+import RPi.GPIO as GPIO
 
 def main(stdscr):
     try:
@@ -46,11 +47,15 @@ class PipeController:
     
     def run(self):
         print("Starting")
-        while True:
-            line = stdin.readline()
-            print(line)
-            if line.strip() in self.controls:
-                self.controls[line.strip()]()
+        try:
+          while True:
+            action = stdin.readline().strip()
+            #print(action)
+            if action in self.controls:
+                self.controls[action]()
+            time.sleep(0.001)
+        finally:
+            GPIO.cleanup()
 
 
 if __name__ == "__main__":
