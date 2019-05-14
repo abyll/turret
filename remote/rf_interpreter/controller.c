@@ -105,6 +105,24 @@ char *optHost    = NULL;
 char *optPort    = NULL;
 float optDuration = 60;
 
+const int ADDRESS = 0b101010101010;
+const int MASK = 0b111111111111;
+const double GAP_THRESHOLD = 0.080; // max seconds between codes sent before we assume we missed some and reset all buttons
+const char CH_UP = 4;
+const char CH_DOWN = 2;
+const char CH_LEFT = 8;
+const char CH_RIGHT = 0;
+const char CH_FIRE = 6;
+
+double last_time = 0;
+
+/* Current button flags */
+char up_state     = 0;
+char down_state   = 0;
+char left_state   = 0;
+char right_state  = 0;
+char fire_state   = 0;
+
 static uint64_t getNum(char *str, int *err)
 {
     uint64_t val;
@@ -115,6 +133,7 @@ static uint64_t getNum(char *str, int *err)
     if (*endptr) {*err = 1; val = -1;}
     return val;
 }
+
 
 static void initOpts(int argc, char *argv[])
 {
@@ -212,16 +231,39 @@ static void initOpts(int argc, char *argv[])
 }
 
 
+
+static inline void change_switch(char *new, char *cur, char *name) {
+    if(*new && !*cur) {
+        printf("%s\n", name);
+        *cur = 1;
+    }
+    else if(!*new && *cur) {
+        printf("!%s\n", name);
+        *cur = 0;
+    }
+    *cur = *new;
+}
+
 void cbf(_433D_rx_data_t r)
 {
-    if (optFull)
-    {
-        printf("%llu %d %d %d %d\n",
-            (long long)r.code, r.bits, r.gap, r.t0, r.t1);
-    }
-    else
-    {
-        printf("%llu %d\n", (long long)r.code, r.bits);
+    int address = r.code >> 11;
+    if( r.bits == 24 && address == ADDRESS ) {
+        int code = r.code & MASK;
+        char up = (code & 1 << CH_UP) != 0;
+        char down = (code & 1 << CH_DOWN) != 0;
+        char left = (code & 1 << CH_LEFT) != 0;
+        char right = (code & 1 << CH_RIGHT) != 0;
+        char fire = (code & 1 << CH_FIRE) != 0;
+        
+        change_switch(&up, &up_state, "UP");
+        change_switch(&down, &down_state, "DOWN");
+        change_switch(&left, &left_state, "LEFT");
+        change_switch(&right, &right_state, "RIGHT");
+        change_switch(&fire, &fire_state, "FIRE");
+        fflush(stdout);
+        double current_time = time_time();
+        //double time_elapsed = current_time - last_time;
+        last_time = current_time;
     }
 }
 
@@ -242,22 +284,38 @@ int main(int argc, char *argv[])
             rx = _433D_rx(pi, optRx, cbf);
             _433D_rx_set_bits(rx, optMinBits, optMaxBits);
             _433D_rx_set_glitch(rx, optGlitch);
-
+            printf("starting\n");
         }
 
 
         if (rx)
         {
+            last_time = time_time();
             /* Give some time for some keyfob presses. */
             while(1) {
-                time_sleep(10);
+                time_sleep(GAP_THRESHOLD - 0.01);
+                double current_time = time_time();
+                if(current_time - last_time > GAP_THRESHOLD) {
+                    char up = 0;
+                    char down = 0;
+                    char left = 0;
+                    char right = 0;
+                    char fire = 0;
+                    change_switch(&up, &up_state, "UP");
+                    change_switch(&down, &down_state, "DOWN");
+                    change_switch(&left, &left_state, "LEFT");
+                    change_switch(&right, &right_state, "RIGHT");
+                    change_switch(&fire, &fire_state, "FIRE");
+                    fflush(stdout);
+                    last_time = time_time();
+                }
             }
             _433D_rx_cancel(rx);
         }
 
         pigpio_stop(pi);
     }
-
+    
     return 0;
 }
 

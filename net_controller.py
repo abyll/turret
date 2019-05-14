@@ -5,7 +5,8 @@
 from sys import stdout
 from twisted.python.log import startLogging, err
 
-from turret import Turret, TestTurret
+from turret import Turret, TestTurret, ThreadTurret
+
 
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
@@ -121,9 +122,12 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--real", action="store_true") #Use test by default
+    parser.add_argument("-t", "--thread", action="store_true") #Threadable turret; overrides Real
     args = parser.parse_args()
     
-    if args.real:
+    if args.thread:
+        turret = ThreadTurret
+    elif args.real:
         turret = Turret
     else:
         turret = TestTurret

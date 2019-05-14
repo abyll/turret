@@ -14,7 +14,7 @@ from twisted.internet import reactor
 class Stepper(object):
     def __init__(self):
         self.ratio = 4076 #measure of # of steps to a complete revolution (360 degrees)
-        self.step_pins = [5, 6, 13, 19]
+        self.step_pins = [11,13,15,16]
         self.seq = [[1,0,0,1],
                [1,0,0,0],
                [1,1,0,0],

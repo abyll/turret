@@ -1,3 +1,3 @@
-from turret import Turret, TestTurret
+from turret import Turret, TestTurret, ThreadTurret
 
-__all__ = ["Turret", "TestTurret"]
+__all__ = ["Turret", "TestTurret", "ThreadTurret"]

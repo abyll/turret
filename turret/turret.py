@@ -4,6 +4,8 @@ from stepper import Stepper
 from led import DimmerRGB
 import Adafruit_PCA9685
 import RPi.GPIO as IO
+import threading
+import time
 
 from twisted.internet import task
 
@@ -56,6 +58,7 @@ class Turret(object):
         self.stepper.step_forever(-direction)
     
     def stop_pan(self):
+        print("pan:{}".format(self.pan_angle))
         self.stepper.stop()
     
     def _tilt_loop(self):
@@ -166,6 +169,38 @@ class TestTurret(Turret):
     def __del__(self):
         #IO.cleanup()
         pass
+
+class ThreadTurret(Turret):
+    def __init__(self, tilt_min=-90, tilt_max = 90):
+            super(Turret, self).__init__(tilt_min, tilt_max)
+            self._tilt_thread = None
+            self.tilt_loop = False
+
+    def _tilt_worker(self):
+        self.tilt_loop = True
+        while(self.tilt_loop):
+            self._tilt_loop()
+            time.sleep(self.tilt_delay)
+        self._tilt_thread = None
+
+    def tilt(self, speed=None):
+        if speed == 0:
+            self.stop_tilt()
+            return
+        if speed == None: speed = self.tilt_speed
+        self.tilt_dir = speed * self.tilt_delay
+        if self._tilt_thread:
+            self.stop_tilt()
+        self._tilt_thread = threading.Thread(target=self._tilt_worker)
+        self._tilt_thread.start()
+
+    def stop_tilt(self):
+        print("Stopping tilt at {}".format(self.tilt_angle))
+        if self._tilt_thread:
+            self.tilt_loop = False
+
+
+
 """
 panLeft()
 panRight()
